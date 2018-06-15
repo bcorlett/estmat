@@ -1,4 +1,4 @@
-% [Px,Py] = stipple_coast(lat_overall, lon_overall, [latrng, lonrng, N, lim])
+% [Px,Py] = stipple_coast(lat_overall, lon_overall [, latrng, lonrng, N, lim ] )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Stippled coastline using weighted Lloyd's algorithm.
 % The function receives input of the coast outline and visually iterates through stippling.
@@ -14,9 +14,13 @@
 %   * Px, Py: coordinates of stipple points
 %
 % Use:
+% 	figure;
 %   [Px,Py]=stipple_coast(lat,lon,[40.6, 40.75],[-74.19, -74.05], 20000, 0.02);
-%   figure;scatter(Px,Py,'k.');hold on;plot(lon,lat,'k');
+%   hold on;plot(lon,lat,'k');
 %
+% Requirements:
+% 	* Matlab mapping toolbox (to determine land polygons)
+% 	* OPTIONAL - Matlab parallel computing toolbox (to speed up iterations)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % B. Corlett, 2018-05-15
 
@@ -67,9 +71,6 @@ end
 %   * valMap: discrete probability function
 % Output:
 %   * Px, Py: normalised coordinate of the generated sample (Nx1 each)
-% Assumptions:
-%   * Normalised coordinate: the first index is (1,1) and all pixels have size of 1
-%   * 1 <= Px < size(valMap,2)+1 and 1 <= Py < size(valMap,1)+1
 
 function [Px,Py,map] = initial_coast(lat_overall, lon_overall, N, lim, latrng, lonrng)
 
@@ -225,12 +226,12 @@ yy = [nonzeros(Qy);y(end)];
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Applying Lloyd's algorithm for weighted area parallelly.
+% Applying Lloyd's algorithm for weighted area in parallel.
 % Input:
 %   * Px0, Py0: list of initial points coordinates (each numPoints x 1)
 %   * valMap: value of density per pixel (Ny x Nx)
 %   * options:
-%       * maxIter: maximum number of iterations (default: 50)
+%       * maxIter: maximum number of iterations
 % Output:
 %   * Px, Py: list of final points coordinates after applying the Lloyd's algorithm (each numPoints x 1)
 %   * Ap: area for each voronoi cell formed by the points (numPoints x 1)
@@ -355,6 +356,7 @@ function [Px, Py] = wtd_lloyds(Px0, Py0, map, lim, lat, lon, latrng, lonrng, opt
     end
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % POWER_BOUNDED computes the power cells about the points (x,y) inside
 % the bounding box (must be a rectangle or a square) crs.  If crs is not supplied, an
 % axis-aligned box containing (x,y) is used.
